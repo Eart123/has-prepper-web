@@ -1,17 +1,19 @@
 // Service Worker for HAS Prepper Disk PWA
-const CACHE_NAME = 'has-prepper-v1';
-const STATIC_CACHE = 'has-prepper-static-v1';
-const DYNAMIC_CACHE = 'has-prepper-dynamic-v1';
-const ZIM_CACHE = 'has-prepper-zim-v1';
+const CACHE_NAME = 'has-prepper-v2';
+const STATIC_CACHE = 'has-prepper-static-v2';
+const DYNAMIC_CACHE = 'has-prepper-dynamic-v2';
+const ZIM_CACHE = 'has-prepper-zim-v2';
 
-// Files to cache immediately
+// Get base path from registration scope
+const basePath = self.registration.scope;
+
+// Files to cache immediately (relative to base)
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/emergency',
-  '/library',
-  '/settings',
+  './',
+  './index.html',
+  './manifest.json',
+  './favicon.svg',
+  './icons/icon.svg',
 ];
 
 // Install event - cache static assets
@@ -19,7 +21,9 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
       console.log('[SW] Caching static assets');
-      return cache.addAll(STATIC_ASSETS);
+      // Use absolute URLs within scope
+      const absoluteUrls = STATIC_ASSETS.map(asset => new URL(asset, basePath).href);
+      return cache.addAll(absoluteUrls);
     }).then(() => self.skipWaiting())
   );
 });
@@ -45,18 +49,15 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
+  // Skip requests outside our scope
+  if (!url.href.startsWith(basePath)) return;
+
   // Skip chrome-extension and other non-http(s) requests
   if (!url.protocol.startsWith('http')) return;
 
   // Handle ZIM files - cache them separately
   if (url.pathname.endsWith('.zim') || url.pathname.includes('/zim/')) {
     event.respondWith(handleZIMRequest(request));
-    return;
-  }
-
-  // Handle API requests
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(handleAPIRequest(request));
     return;
   }
 
@@ -84,7 +85,7 @@ async function handleStaticRequest(request) {
   } catch (error) {
     // Return offline page for navigation requests
     if (request.mode === 'navigate') {
-      const offlineResponse = await caches.match('/');
+      const offlineResponse = await caches.match(new URL('./index.html', basePath).href);
       if (offlineResponse) return offlineResponse;
     }
 
@@ -123,30 +124,6 @@ async function handleZIMRequest(request) {
   }
 }
 
-// Handle API requests - network first, then cache
-async function handleAPIRequest(request) {
-  try {
-    const networkResponse = await fetch(request);
-
-    if (networkResponse.ok) {
-      const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put(request, networkResponse.clone());
-    }
-
-    return networkResponse;
-  } catch (error) {
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
-    return new Response(JSON.stringify({ error: 'Çevrimdışı' }), {
-      status: 503,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-}
-
 // Background sync for pending operations
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-zim-files') {
@@ -155,40 +132,8 @@ self.addEventListener('sync', (event) => {
 });
 
 async function syncZIMFiles() {
-  // This would sync any pending ZIM file operations
-  // For now, just log
   console.log('[SW] Background sync triggered');
 }
-
-// Push notifications (for future use)
-self.addEventListener('push', (event) => {
-  if (!event.data) return;
-
-  const data = event.data.json();
-  const options = {
-    body: data.body,
-    icon: '/icon-192.png',
-    badge: '/icon-72.png',
-    vibrate: [100, 50, 100],
-    data: data.data,
-    actions: data.actions || [],
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(data.title, options)
-  );
-});
-
-// Notification click handler
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-
-  if (event.action === 'open') {
-    event.waitUntil(
-      clients.openWindow(event.notification.data?.url || '/')
-    );
-  }
-});
 
 // Message handler for communication with main thread
 self.addEventListener('message', (event) => {
