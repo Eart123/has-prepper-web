@@ -2,8 +2,10 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-// GitHub Pages base path - set via GITHUB_PAGES_REPO env var or default to empty for custom domain
-const base = process.env.GITHUB_PAGES_REPO ? `/${process.env.GITHUB_PAGES_REPO}/` : '/';
+// GitHub Pages base path - set via GITHUB_PAGES_REPO env var or default to has-prepper-web
+const base = process.env.GITHUB_PAGES_REPO
+  ? `/${process.env.GITHUB_PAGES_REPO}/`
+  : '/has-prepper-web/';
 
 export default defineConfig({
   plugins: [react()],

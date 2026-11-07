@@ -426,9 +426,9 @@ export const Library: React.FC = () => {
 };
 
 const openZIMReader = (zimId: string) => {
-  window.location.href = `/reader/${zimId}`;
+  window.location.hash = `#/reader/${zimId}`;
 };
 
 const searchInZIM = (zimId: string) => {
-  window.location.href = `/reader/${zimId}?search=true`;
+  window.location.hash = `#/reader/${zimId}?search=true`;
 };

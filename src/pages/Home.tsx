@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Map, HeartPulse, Wrench, GraduationCap, Search as SearchIcon, Download, ExternalLink } from 'lucide-react';
 import { escapeHtml } from '../lib/utils';
 import { useApp } from '../contexts/AppContext';
@@ -8,6 +8,7 @@ import { database } from '../lib/database';
 
 export const Home: React.FC = () => {
   const { state } = useApp();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [_selectedBook, _setSelectedBook] = useState('');
   const [books, setBooks] = useState<{ id: string; href: string; title: string }[]>([]);
@@ -79,37 +80,34 @@ export const Home: React.FC = () => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
 
-    // Use first available ZIM file for search, or go to library search
     const firstZim = state.zimFiles[0];
     if (firstZim) {
-      window.location.href = `/reader/${firstZim.id}?search=${encodeURIComponent(searchQuery)}`;
+      navigate(`/reader/${firstZim.id}?search=${encodeURIComponent(searchQuery)}`);
     } else {
-      window.location.href = `/library?search=${encodeURIComponent(searchQuery)}`;
+      navigate(`/library?search=${encodeURIComponent(searchQuery)}`);
     }
   };
 
-  const handleDownloadItem = async (item: ZIMContentItem) => {
-    // Internal routes (maps, kolibri) - use router navigation
+  const handleDownloadItem = (item: ZIMContentItem) => {
+    // Internal routes - use navigate
     if (item.url && item.url.startsWith('/')) {
-      window.location.href = item.url;
+      navigate(item.url);
       return;
     }
-    // External URLs - open in new tab
+    // External URLs
     if (item.url) {
       window.open(item.url, '_blank');
       return;
     }
     if (!item.zim) return;
 
-    // Try to find in auto-downloader catalog
     const firstZim = state.zimFiles[0];
     if (firstZim) {
-      window.location.href = `/reader/${firstZim.id}?search=${encodeURIComponent(item.name)}`;
+      navigate(`/reader/${firstZim.id}?search=${encodeURIComponent(item.name)}`);
       return;
     }
     
-    // Navigate to download page
-    window.location.href = `/download`;
+    navigate('/download');
   };
 
   const getCategoryIcon = (title: string) => {
@@ -232,30 +230,24 @@ export const Home: React.FC = () => {
                         <i className={iconClass} />
                       </td>
                       <td className="has-row1">
-                        {(hasUrl && itemUrl) || (!hasUrl && item.zim) ? (
-                          <a 
-                            href="#" 
-                            onClick={(e) => { e.preventDefault(); handleDownloadItem(item); }}
-                            className="has-fname cursor-pointer"
-                          >{escapeHtml(item.name)}</a>
-                        ) : (
-                          <span className="has-fname">{escapeHtml(item.name)}</span>
-                        )}
+                        <a 
+                          href="#" 
+                          onClick={(e) => { e.preventDefault(); handleDownloadItem(item); }}
+                          className="has-fname cursor-pointer"
+                        >{escapeHtml(item.name)}</a>
                         <div className="has-fdesc">{escapeHtml(item.desc)}</div>
                       </td>
                       <td className="has-row2 has-td-center hide-s">{escapeHtml(item.lang)}</td>
                       <td className="has-row2 has-td-center">{escapeHtml(item.size)}</td>
                       <td className="has-row3 has-td-center hide-s has-small">{escapeHtml(status)}</td>
                       <td className="has-td-center">
-                        {((hasUrl && itemUrl) || (!hasUrl && item.zim)) && (
-                          <button
-                            onClick={(e) => { e.preventDefault(); handleDownloadItem(item); }}
-                            className="p-1 text-has-textMuted hover:text-has-blue transition-colors"
-                            title={hasUrl ? 'Aç' : 'İndir'}
-                          >
-                            {hasUrl ? <ExternalLink className="w-4 h-4" /> : <Download className="w-4 h-4" />}
-                          </button>
-                        )}
+                        <button
+                          onClick={(e) => { e.preventDefault(); handleDownloadItem(item); }}
+                          className="p-1 text-has-textMuted hover:text-has-blue transition-colors"
+                          title={hasUrl ? 'Aç' : 'İndir'}
+                        >
+                          {hasUrl ? <ExternalLink className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+                        </button>
                       </td>
                     </tr>
                   );
