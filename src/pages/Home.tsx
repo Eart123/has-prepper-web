@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Map, HeartPulse, Wrench, GraduationCap, Search as SearchIcon } from 'lucide-react';
+import { BookOpen, Map, HeartPulse, Wrench, GraduationCap, Search as SearchIcon, Download, ExternalLink } from 'lucide-react';
 import { escapeHtml } from '../lib/utils';
 import { useApp } from '../contexts/AppContext';
 import { DEFAULT_CATEGORIES, type ZIMContentItem } from '../lib/types';
@@ -8,7 +8,6 @@ import { database } from '../lib/database';
 
 export const Home: React.FC = () => {
   const { state } = useApp();
-  // const [searchParams] = useSearchParams(); // Reserved for future use
   const [searchQuery, setSearchQuery] = useState('');
   const [_selectedBook, _setSelectedBook] = useState('');
   const [books, setBooks] = useState<{ id: string; href: string; title: string }[]>([]);
@@ -87,6 +86,30 @@ export const Home: React.FC = () => {
     } else {
       window.location.href = `/library?search=${encodeURIComponent(searchQuery)}`;
     }
+  };
+
+  const handleDownloadItem = async (item: ZIMContentItem) => {
+    // Internal routes (maps, kolibri) - use router navigation
+    if (item.url && item.url.startsWith('/')) {
+      window.location.href = item.url;
+      return;
+    }
+    // External URLs - open in new tab
+    if (item.url) {
+      window.open(item.url, '_blank');
+      return;
+    }
+    if (!item.zim) return;
+
+    // Try to find in auto-downloader catalog
+    const firstZim = state.zimFiles[0];
+    if (firstZim) {
+      window.location.href = `/reader/${firstZim.id}?search=${encodeURIComponent(item.name)}`;
+      return;
+    }
+    
+    // Navigate to download page
+    window.location.href = `/download`;
   };
 
   const getCategoryIcon = (title: string) => {
@@ -180,13 +203,14 @@ export const Home: React.FC = () => {
               <th className="hide-s">Dil</th>
               <th>Boyut</th>
               <th className="hide-s">Durum</th>
+              <th className="hide-s">İşlem</th>
             </tr>
           </thead>
           <tbody>
             {DEFAULT_CATEGORIES.map((category) => (
               <React.Fragment key={category.title}>
                 <tr>
-                  <td className="has-td-cat" colSpan={5}>
+                  <td className="has-td-cat" colSpan={6}>
                     <div className="flex items-center gap-2">
                       {getCategoryIcon(category.title)}
                       {category.title}
@@ -208,8 +232,12 @@ export const Home: React.FC = () => {
                         <i className={iconClass} />
                       </td>
                       <td className="has-row1">
-                        {hasUrl && itemUrl ? (
-                          <a href={itemUrl} className="has-fname">{escapeHtml(item.name)}</a>
+                        {(hasUrl && itemUrl) || (!hasUrl && item.zim) ? (
+                          <a 
+                            href="#" 
+                            onClick={(e) => { e.preventDefault(); handleDownloadItem(item); }}
+                            className="has-fname cursor-pointer"
+                          >{escapeHtml(item.name)}</a>
                         ) : (
                           <span className="has-fname">{escapeHtml(item.name)}</span>
                         )}
@@ -218,6 +246,17 @@ export const Home: React.FC = () => {
                       <td className="has-row2 has-td-center hide-s">{escapeHtml(item.lang)}</td>
                       <td className="has-row2 has-td-center">{escapeHtml(item.size)}</td>
                       <td className="has-row3 has-td-center hide-s has-small">{escapeHtml(status)}</td>
+                      <td className="has-td-center">
+                        {((hasUrl && itemUrl) || (!hasUrl && item.zim)) && (
+                          <button
+                            onClick={(e) => { e.preventDefault(); handleDownloadItem(item); }}
+                            className="p-1 text-has-textMuted hover:text-has-blue transition-colors"
+                            title={hasUrl ? 'Aç' : 'İndir'}
+                          >
+                            {hasUrl ? <ExternalLink className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}

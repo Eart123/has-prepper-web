@@ -2,20 +2,26 @@
   "name": "HAS Prepper Disk",
   "short_name": "HAS Prepper",
   "description": "Çevrimdışı bilgi arşivi - Wikipedia, haritalar ve hayatta kalma kaynakları",
-  "start_url": "/",
+  "start_url": ".",
+  "scope": ".",
   "display": "standalone",
   "background_color": "#E5E5E5",
   "theme_color": "#006699",
   "orientation": "portrait-primary",
-  "scope": "/",
   "lang": "tr",
   "dir": "ltr",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "icons/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ],
   "categories": ["reference", "education", "utilities"],
@@ -24,15 +30,15 @@
       "name": "Acil Durum",
       "short_name": "Acil",
       "description": "Acil durum rehberleri",
-      "url": "/emergency",
-      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+      "url": "emergency",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
     },
     {
       "name": "Kütüphane",
       "short_name": "Kütüphane",
       "description": "Yüklü ZIM dosyalarını görüntüle",
-      "url": "/library",
-      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+      "url": "library",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
     }
   ],
   "related_applications": [],

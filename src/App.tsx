@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from './contexts/AppContext';
 import { Layout } from './components/layout/Layout';
 import { Home } from './pages/Home';
@@ -8,6 +8,8 @@ import { Emergency } from './pages/Emergency';
 import { Settings } from './pages/Settings';
 import { ZIMReader } from './pages/ZIMReader';
 import { Maps } from './pages/Maps';
+import { AutoZIMDownloader } from './pages/AutoZIMDownloader';
+import { Kolibri } from './pages/Kolibri';
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center h-64">
@@ -27,6 +29,8 @@ function AppRoutes() {
           <Route path="settings" element={<Settings />} />
           <Route path="reader/:zimId" element={<ZIMReader />} />
           <Route path="maps" element={<Maps />} />
+          <Route path="kolibri" element={<Kolibri />} />
+          <Route path="download" element={<AutoZIMDownloader />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -37,9 +41,9 @@ function AppRoutes() {
 const App: React.FC = () => {
   return (
     <AppProvider>
-      <BrowserRouter>
+      <HashRouter>
         <AppRoutes />
-      </BrowserRouter>
+      </HashRouter>
     </AppProvider>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { FolderOpen, Download, Trash2, Search, Eye, ChevronDown, ChevronUp, FileText, ExternalLink, BookOpen, Map, HeartPulse, Wrench, GraduationCap } from 'lucide-react';
+import { useSearchParams, Link } from 'react-router-dom';
+import { FolderOpen, Download, Trash2, Search, Eye, ChevronDown, ChevronUp, FileText, ExternalLink, BookOpen, Map, HeartPulse, Wrench, GraduationCap, Package } from 'lucide-react';
 import { cn, formatBytes, escapeHtml } from '../lib/utils';
 import { useApp } from '../contexts/AppContext';
 import { zimReader } from '../lib/zim-reader';
@@ -173,6 +173,12 @@ export const Library: React.FC = () => {
             <Download className="w-4 h-4 mr-2" />
             ZIM Ekle
           </Button>
+          <Link to="/download">
+            <Button>
+              <Package className="w-4 h-4 mr-2" />
+              Otomatik İndir
+            </Button>
+          </Link>
         </div>
       </div>
 

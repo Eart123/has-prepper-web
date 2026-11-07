@@ -1,13 +1,18 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../../lib/utils';
-import { Menu, X, Download, Wifi, WifiOff } from 'lucide-react';
+import { Menu, X, Download, Wifi, WifiOff, Info } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 
 export const Header: React.FC = () => {
   const { state, dispatch, addToast } = useApp();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [showIOSInstall, setShowIOSInstall] = React.useState(false);
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+  const isInStandaloneApp = isStandalone || (window.navigator as any).standalone === true;
 
   const handleInstall = async () => {
     const event = (window as unknown as { deferredPrompt?: BeforeInstallPromptEvent }).deferredPrompt;
@@ -20,6 +25,10 @@ export const Header: React.FC = () => {
       }
       (window as unknown as { deferredPrompt?: BeforeInstallPromptEvent }).deferredPrompt = undefined;
     }
+  };
+
+  const handleIOSInstallInfo = () => {
+    setShowIOSInstall(true);
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -103,7 +112,8 @@ export const Header: React.FC = () => {
         </div>
       )}
 
-      {state.installPrompt.show && !state.installPrompt.dismissed && (
+      {/* Android/Desktop Install Prompt */}
+      {state.installPrompt.show && !state.installPrompt.dismissed && !isIOS && !isInStandaloneApp && (
         <div className="install-prompt md:hidden fixed bottom-4 right-4 left-4 md:left-auto max-w-sm z-50">
           <div className="bg-white border border-has-border rounded-lg shadow-lg p-4">
             <div className="flex items-start gap-3">
@@ -129,6 +139,71 @@ export const Header: React.FC = () => {
                   dispatch({ type: 'SET_INSTALL_PROMPT', payload: { dismissed: true } });
                 }}
                 className="px-3 py-2 text-sm font-medium text-has-text bg-has-cardBg border border-has-border rounded hover:bg-has-cardBg2 transition-colors"
+              >
+                Daha Sonra
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* iOS Install Info Button (shows on iOS when not installed) */}
+      {isIOS && !isInStandaloneApp && state.settings.showInstallPrompt && (
+        <button
+          onClick={handleIOSInstallInfo}
+          className="fixed bottom-4 right-4 left-4 md:left-auto md:right-4 md:bottom-4 z-50 px-4 py-2 bg-has-blue text-white text-sm font-medium rounded-lg shadow-lg flex items-center gap-2 animate-slide-up"
+          aria-label="iOS kurulum bilgisi"
+        >
+          <Download className="w-5 h-5" />
+          <span>Ana ekrana ekle</span>
+          <Info className="w-4 h-4 ml-auto" />
+        </button>
+      )}
+
+      {/* iOS Install Instructions Modal */}
+      {showIOSInstall && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowIOSInstall(false)}>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <Download className="w-6 h-6 text-has-blue" />
+              </div>
+              <div>
+                <h3 className="font-bold text-has-text">iOS'ta Uygulama Olarak Yükle</h3>
+                <p className="text-sm text-has-textMuted">Safari'de "Paylaş" butonuna basın ve "Ana Ekrana Ekle"yi seçin</p>
+              </div>
+            </div>
+            <div className="space-y-3 text-sm text-has-text">
+              <div className="p-3 bg-has-cardBg rounded-lg flex items-center gap-3">
+                <span className="bg-has-blue text-white text-xl rounded-full w-8 h-8 flex items-center justify-center">1</span>
+                <span>Safari'de bu sayfayı açın</span>
+              </div>
+              <div className="p-3 bg-has-cardBg rounded-lg flex items-center gap-3">
+                <span className="bg-has-blue text-white text-xl rounded-full w-8 h-8 flex items-center justify-center">2</span>
+                <span>Alt menüden <strong>Paylaş</strong> (kare ve ok ikonu) butonuna basın</span>
+              </div>
+              <div className="p-3 bg-has-cardBg rounded-lg flex items-center gap-3">
+                <span className="bg-has-blue text-white text-xl rounded-full w-8 h-8 flex items-center justify-center">3</span>
+                <span>Aşağı kaydırıp <strong>Ana Ekrana Ekle</strong> seçeneğine dokunun</span>
+              </div>
+              <div className="p-3 bg-has-cardBg rounded-lg flex items-center gap-3">
+                <span className="bg-has-blue text-white text-xl rounded-full w-8 h-8 flex items-center justify-center">4</span>
+                <span><strong>Ekle</strong> butonuna basın - uygulama ana ekranda belirecek</span>
+              </div>
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setShowIOSInstall(false)}
+                className="flex-1 px-4 py-2 bg-has-blue text-white font-medium rounded-lg hover:bg-[#00527a] transition-colors"
+              >
+                Anladım
+              </button>
+              <button
+                onClick={() => {
+                  dispatch({ type: 'SET_INSTALL_PROMPT', payload: { dismissed: true } });
+                  setShowIOSInstall(false);
+                }}
+                className="px-4 py-2 text-has-text bg-has-cardBg border border-has-border rounded-lg hover:bg-has-cardBg2 transition-colors"
               >
                 Daha Sonra
               </button>

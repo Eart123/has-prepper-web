@@ -3,10 +3,13 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 
+// Base path for assets (handles GitHub Pages subdirectory deployment)
+const basePath = import.meta.env.BASE_URL || '/';
+
 // Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(
+    navigator.serviceWorker.register(`${basePath}sw.js`, { scope: basePath }).then(
       (registration) => {
         console.log('[SW] Registered:', registration.scope);
         registration.addEventListener('updatefound', () => {
