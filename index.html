@@ -14,12 +14,26 @@
     <link rel="apple-touch-icon" href="/icon-192.png" />
     <link rel="mask-icon" href="/icon-512.png" color="#006699" />
     <title>HAS Prepper Disk</title>
-    <script type="module" crossorigin src="/has-prepper-web/assets/index-DaQmzgg8.js"></script>
+    <!-- GitHub Pages SPA redirect handler -->
+    <script>
+      (function() {
+        var l = window.location;
+        if (l.search.startsWith('/?/')) {
+          var newPath = l.pathname + l.search.slice(3) + l.hash;
+          l.replace(newPath);
+          // Clean up history
+          if (window.history.replaceState) {
+            window.history.replaceState(null, '', newPath);
+          }
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/has-prepper-web/assets/index-Bp9FqI5X.js"></script>
     <link rel="modulepreload" crossorigin href="/has-prepper-web/assets/rolldown-runtime-WkwZ5CU-.js">
-    <link rel="modulepreload" crossorigin href="/has-prepper-web/assets/vendor-ZVEr0_h1.js">
+    <link rel="modulepreload" crossorigin href="/has-prepper-web/assets/vendor-SxQC41hY.js">
     <link rel="modulepreload" crossorigin href="/has-prepper-web/assets/db-4gYTbcxE.js">
     <link rel="modulepreload" crossorigin href="/has-prepper-web/assets/ui-CdK3cBzO.js">
-    <link rel="stylesheet" crossorigin href="/has-prepper-web/assets/index-XcvEVkQl.css">
+    <link rel="stylesheet" crossorigin href="/has-prepper-web/assets/index-DVV2Bdv1.css">
   </head>
   <body>
     <div id="root"></div>
